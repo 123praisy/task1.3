@@ -18,21 +18,43 @@ df = df.dropna(subset=["Review Text"]).reset_index(drop=True)
 # Create Product Names
 df["Product Name"] = "Product " + df.index.astype(str)
 
-# ---------------- CSS ----------------
+# ---------------- CSS (FINAL FIXED) ----------------
 st.markdown("""
 <style>
+
+/* BACKGROUND */
 .stApp {
     background-color: #1e3a8a;
 }
 
-/* FORCE ALL TEXT WHITE */
-html, body, [class*="css"], p, div, span {
+/* ALL TEXT WHITE */
+html, body, p, div, span, label {
     color: white !important;
 }
 
-/* INPUT TEXT */
+/* INPUT TEXT BLACK */
 textarea, input {
     color: black !important;
+}
+
+/* SELECTBOX FIX */
+div[data-baseweb="select"] > div {
+    background-color: white !important;
+    color: black !important;
+}
+
+/* DROPDOWN OPTIONS */
+div[role="listbox"] {
+    background-color: white !important;
+    color: black !important;
+}
+
+/* BUTTON */
+.stButton > button {
+    border-radius: 12px;
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    color: white !important;
+    font-weight: 600;
 }
 
 /* TITLE */
@@ -42,19 +64,11 @@ textarea, input {
     font-weight: 800;
 }
 
-/* CENTER */
+/* CENTER TEXT */
 .center {
     text-align: center;
 }
 
-/* BUTTON */
-.stButton>button {
-    border-radius: 12px;
-    background: linear-gradient(90deg, #2563eb, #3b82f6);
-    color: white;
-    font-weight: 600;
-    padding: 10px 20px;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -85,13 +99,11 @@ elif st.session_state.page == "app":
     )
 
     product_data = df[df["Product Name"] == selected_product].iloc[0]
-
     review_text = product_data["Review Text"]
 
     st.markdown("### 📝 Customer Review")
     st.info(review_text)
 
-    # BUTTON
     if st.button("🔍 Understand Customer Decision"):
 
         with st.spinner("Analyzing customer intention... 🤖"):
@@ -104,7 +116,7 @@ elif st.session_state.page == "app":
 
         prob_yes = float(prob[1]) * 100
 
-        # SIMPLE INTENTION LOGIC
+        # INTENTION LOGIC
         review_lower = review_text.lower()
         negative_words = ["not", "bad", "worst", "poor", "disappointed"]
         positive_words = ["love", "great", "perfect", "amazing", "good"]
@@ -117,7 +129,7 @@ elif st.session_state.page == "app":
 
         st.markdown("---")
 
-        # RESULT BOX
+        # RESULT
         if prediction == 1:
             st.markdown(f"""
             <div style="background:#14532d; padding:20px; border-radius:12px;">
@@ -133,7 +145,7 @@ elif st.session_state.page == "app":
             </div>
             """, unsafe_allow_html=True)
 
-        # ---------------- WHY ----------------
+        # WHY
         st.markdown("### 🧠 Why this decision?")
 
         if neg_count > pos_count:
@@ -141,24 +153,23 @@ elif st.session_state.page == "app":
         elif pos_count > neg_count:
             st.write("The customer expresses satisfaction and positive intent.")
         else:
-            st.write("The review contains mixed opinions, leading to a balanced decision.")
+            st.write("The review contains mixed opinions.")
 
-        # ---------------- CONFIDENCE ----------------
+        # CONFIDENCE
         st.markdown("### 📊 Confidence Level")
         score = prob_yes if prediction == 1 else 100 - prob_yes
         st.progress(int(score))
         st.write(f"{score:.1f}% confidence")
 
-        # ---------------- KEY WORDS ----------------
+        # KEY WORDS
         st.markdown("### 🔑 Key Words Influencing Decision")
-
         words = review_text.lower().split()
         common = Counter(words).most_common(5)
 
         for word, count in common:
             st.write(f"{word} ({count})")
 
-        # ---------------- HIGHLIGHT ----------------
+        # HIGHLIGHT
         st.markdown("### ✨ Important Words in Review")
 
         highlighted = review_text
@@ -175,7 +186,7 @@ elif st.session_state.page == "app":
 
         st.markdown(highlighted, unsafe_allow_html=True)
 
-    # BACK BUTTON
     st.markdown("---")
+
     if st.button("⬅️ Back to Home"):
         st.session_state.page = "home"
