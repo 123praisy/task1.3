@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 # ---------------- CONFIG ----------------
 st.set_page_config(page_title="Product Recommendation Calculator", layout="wide")
 
+st.plotly_chart(fig, key=f"gauge_{item}")
+
 # ---------------- LOAD ----------------
 model = joblib.load("model.pkl")
 vectorizer = joblib.load("vectorizer.pkl")
@@ -77,7 +79,7 @@ if page == "Review Analysis":
         st.success("Added to cart")
 
     st.write("### 🧺 Cart Items")
-    for item in st.session_state.cart:
+    for i, item in enumerate(st.session_state.cart):
         st.write("✔", item)
 
     # -------- ANALYZE BUTTON --------
@@ -89,7 +91,7 @@ if page == "Review Analysis":
 
         best_score = 0
 
-        for item in st.session_state.cart:
+        for i, item in enumerate(st.session_state.cart):
 
             pid = int(item.split(" - ")[0])
             data = df[df["Clothing ID"] == pid]
@@ -133,7 +135,7 @@ if page == "Review Analysis":
                 gauge={'axis': {'range': [0, 100]}}
             ))
 
-            st.plotly_chart(fig, key=f"gauge_{item}")  # ✅ FIXED
+            st.plotly_chart(fig, key=f"gauge_{item}_{i}")  # ✅ FIXED
 
             if prob > best_score:
                 best_score = prob
@@ -142,11 +144,13 @@ if page == "Review Analysis":
         st.markdown("---")
         st.success(f"🏆 Best Product: {st.session_state.best_product} ⭐⭐⭐⭐⭐")
 
-        if st.button("Purchase Best Product"):
-            st.session_state.confirm_purchase = True
+        purchase_clicked = st.button("Purchase Best Product")
+
+if purchase_clicked:
+    st.session_state.confirm_purchase = True
 
     # -------- PURCHASE FLOW --------
-    if st.session_state.confirm_purchase:
+    if st.session_state.confirm_purchase and st.session_state.cart:
 
         st.subheader("🛍 Confirm Purchase")
 
@@ -156,8 +160,9 @@ if page == "Review Analysis":
         )
 
         if st.button("Confirm Purchase"):
-            st.session_state.purchased = selected_purchase
-            st.session_state.confirm_purchase = False
+    st.session_state.purchased = selected_purchase
+    st.session_state.confirm_purchase = False
+    st.session_state.analysis_done = True
             st.success("🎉 Thank you for choosing highly recommended product!")
 
     # -------- REVIEW SECTION --------
