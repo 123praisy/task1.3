@@ -10,8 +10,6 @@ import matplotlib.pyplot as plt
 # ---------------- CONFIG ----------------
 st.set_page_config(page_title="Product Recommendation Calculator", layout="wide")
 
-st.plotly_chart(fig, key=f"gauge_{item}")
-
 # ---------------- LOAD ----------------
 model = joblib.load("model.pkl")
 vectorizer = joblib.load("vectorizer.pkl")
